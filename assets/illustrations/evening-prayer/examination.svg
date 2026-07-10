@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 150">
+  <rect width="280" height="150" fill="#fff"/>
+  <path d="M36 116c40-4 82-5 127-2 32 2 59-1 83-6" fill="none" stroke="#1c1b18" stroke-width="2" stroke-linecap="round"/>
+  <path d="M53 104c24-25 58-33 102-21 33 9 62 1 83-20 8 26-12 50-50 61-47 14-91 8-135-20z" fill="#fff1c1" opacity=".84"/>
+  <ellipse cx="112" cy="70" rx="14" ry="18" transform="rotate(8 112 70)" fill="none" stroke="#1c1b18" stroke-width="2.1"/>
+  <path d="M109 87c-7 11-13 22-17 35m15-29c-15 8-29 12-42 12m44-12c14 12 29 18 47 18m-65 10c-9 6-18 8-28 7m28-7c9 5 20 6 31 4" fill="none" stroke="#1c1b18" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M120 45c8-13 25-14 34-4 8 9 4 24-13 34m-1 12h.2" fill="none" stroke="#1c1b18" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M170 36c6-8 18-9 24-2 6 8 1 20-11 27m-2 11h.2" fill="none" stroke="#1c1b18" stroke-width="2" stroke-linecap="round"/>
+  <path d="M211 44c4-7 13-8 18-3 6 6 2 16-8 22m-2 10h.2" fill="none" stroke="#1c1b18" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M81 39c2-6 8-8 13-5 5 4 3 12-4 17m-2 9h.2" fill="none" stroke="#1c1b18" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M191 89c5-4 13-3 17 2 4 7-2 14-11 15-9 0-15-6-11-13 1-2 3-3 5-4zm-1 8c6 2 13 2 20 0m-15-8c-2-4-1-7 4-9m-2 10c3-3 7-4 11-3" fill="none" stroke="#1c1b18" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="52" y="83" font-family="Fira Sans, sans-serif" font-size="12" font-weight="900" fill="#1c1b18" transform="rotate(-8 52 83)">Grrrr</text>
+  <path d="M61 67c-7-3-13-8-16-15m23 18c-3-8-3-16 1-23m152 36c10-3 18-8 24-16" fill="none" stroke="#1c1b18" stroke-width="1.2" stroke-linecap="round"/>
+</svg>

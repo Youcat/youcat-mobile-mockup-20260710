@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>YOUCAT Learning Platform Prototype</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="phone-frame" aria-label="YOUCAT Learning Platform prototype">
+      <header class="topbar" aria-label="Alice status">
+        <button class="score-strip" type="button" data-action="go" data-route="home" aria-label="Back to home">
+          <span class="score-item">
+            <svg class="score-icon is-cross" viewBox="0 0 20 20" aria-hidden="true">
+              <line x1="10" y1="3" x2="10" y2="17" />
+              <line x1="4" y1="9" x2="16" y2="10" />
+            </svg>
+            <span>235</span>
+          </span>
+          <span class="score-item">
+            <svg class="score-icon" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M10 3.2c1.4 0 2.2.9 2.2 2 0 1.3-.9 2-2.1 2S8 6.5 8 5.2c0-1.1.7-2 2-2Z" />
+              <path d="M10 7.4c.1 3.6-.2 6.4-3.8 7.7" />
+              <path d="M10 7.5c.1 3.7.9 6.2 4.2 7.4" />
+              <path d="M4.5 12.1c.9 2.4 2.4 3.6 5.4 3.7 2.8 0 4.8-1 5.6-3.6" />
+            </svg>
+            <span>34</span>
+          </span>
+          <span class="score-item">
+            <svg class="score-icon is-heart" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M10 16.5C6 13.6 3.6 11.4 3.2 8.8 2.8 6.1 5.1 4.2 7.3 5.3 8.5 5.8 9.2 6.8 10 7.8c.8-1.1 1.8-2.4 3.5-2.6 2.2-.2 3.7 1.7 3.3 4-.4 2.4-3.1 4.7-6.8 7.3Z" />
+            </svg>
+            <span>13</span>
+          </span>
+        </button>
+
+        <div class="top-actions">
+          <button class="top-action" type="button" data-action="go" data-route="notifications" aria-label="Notifications">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7.4 16.2c.3-2 .3-3.9.1-5.7-.2-3 1.6-5.1 4.5-5.1 2.8 0 4.7 2 4.5 5.1-.1 1.8-.1 3.7.2 5.7" />
+              <path d="M5.8 16.5c3.8.7 8.2.7 12.6 0" />
+              <path d="M10.1 18.4c.7 1.1 2.6 1.2 3.5.1" />
+            </svg>
+            <span class="notice-dot" aria-hidden="true"></span>
+          </button>
+          <button class="avatar-button" type="button" data-action="go" data-route="settings" aria-label="Alice settings">
+            <span>A</span>
+          </button>
+        </div>
+      </header>
+
+      <section id="screen" class="screen-scroll" aria-live="polite"></section>
+
+      <nav class="bottom-nav" aria-label="Main navigation">
+        <button type="button" class="nav-item" data-action="go" data-route="explore">
+          <svg class="nav-icon" viewBox="0 0 28 28" aria-hidden="true">
+            <circle cx="14" cy="14" r="9" />
+            <path d="M17.8 9.6c-1 3.6-2.5 5.9-6.9 8.3.9-3.8 2.5-6.2 6.9-8.3Z" />
+          </svg>
+          <span>explore</span>
+        </button>
+        <button type="button" class="nav-item" data-action="go" data-route="read">
+          <svg class="nav-icon" viewBox="0 0 28 28" aria-hidden="true">
+            <path d="M6 8c4-.9 7-.4 9 1.4v12.2c-2.3-1.6-5.2-2.1-9.1-1.2C6.4 16.7 6.4 12.4 6 8Z" />
+            <path d="M15 9.4c2.1-1.7 4.8-2 8-1v12.1c-3.4-.8-6.1-.5-8 1.1" />
+          </svg>
+          <span>read</span>
+        </button>
+        <button type="button" class="nav-item" data-action="go" data-route="home">
+          <svg class="nav-icon" viewBox="0 0 30 30" aria-hidden="true">
+            <path class="nav-patch" d="M7 14c4-5 8.8-7.4 16-1.4l-.8 11.2c-5 .4-10.2.5-14.7-.2L7 14Z" />
+            <path d="M5.2 14.7c3.1-3.4 6.1-6 9.5-8.3 3.5 2.4 6.8 5 10.3 8.6" />
+            <path d="M8.4 14.2c-.2 3.6 0 6.8.4 9.9 4.4.7 8.7.6 13.1-.2.3-3.3.4-6.5 0-9.8" />
+          </svg>
+          <span>home</span>
+        </button>
+        <button type="button" class="nav-item" data-action="go" data-route="groups">
+          <svg class="nav-icon" viewBox="0 0 28 28" aria-hidden="true">
+            <circle cx="10" cy="10" r="3" />
+            <circle cx="18" cy="9.2" r="2.8" />
+            <path d="M5.4 21c.6-4.1 2.1-6.3 5-6.2 2.6 0 4.2 2 4.8 6" />
+            <path d="M14.5 15.5c3.3-.8 5.8 1 6.9 5.1" />
+          </svg>
+          <span>groups</span>
+        </button>
+        <button type="button" class="nav-item" data-action="go" data-route="pray">
+          <svg class="nav-icon" viewBox="0 0 28 28" aria-hidden="true">
+            <path d="M12.8 5.8c-.7 4-.2 7.9 1 12" />
+            <path d="M16.3 6.4c.3 4.5-.3 8.1-1.8 11.5" />
+            <path d="M9 12.4c1.7 3.3 3.3 5.6 5.1 8.9" />
+            <path d="M19.8 12.1c-1.5 3.1-3.1 6-5.1 9.2" />
+          </svg>
+          <span>pray</span>
+        </button>
+      </nav>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
