@@ -26,6 +26,17 @@ const state = {
   bookmarkQuery: "",
   bookmarksExpanded: false,
   focusBookmarkSearch: false,
+  onboardingStep: 0,
+  onboardingName: "Alice",
+  onboardingAge: 21,
+  onboardingLanguage: "English",
+  routineQuestions: 3,
+  routinePrayer: true,
+  routineReminder: true,
+  quizAnswer: "",
+  reflectionDraft: "",
+  groupDraftQuestions: 2,
+  groupJoinCode: "",
   heartsGiven: {
     anna: 1,
     leo: 0,
@@ -36,7 +47,7 @@ const state = {
 const routesWithNav = {
   home: "home",
   explore: "explore",
-  question: "home",
+  question: "explore",
   story: "explore",
   reflections: "explore",
   read: "read",
@@ -45,6 +56,9 @@ const routesWithNav = {
   group: "groups",
   pray: "pray",
   prayer: "pray",
+  groupCreate: "groups",
+  groupJoin: "groups",
+  systemState: "home",
 };
 
 const missions = [
@@ -137,7 +151,7 @@ const questionSlides = [
   },
   {
     id: "match",
-    xp: 5,
+    xp: 15,
     title: "Match the signs",
     kind: "Game",
     pairs: [
@@ -151,10 +165,22 @@ const questionSlides = [
     ],
   },
   {
+    id: "quiz",
+    xp: 10,
+    title: "Choose the best answer",
+    kind: "Quiz",
+  },
+  {
     id: "reflect",
     xp: 15,
     title: "Who is the Holy Spirit?",
     kind: "Reflection",
+  },
+  {
+    id: "complete",
+    xp: 0,
+    title: "Question complete",
+    kind: "Complete",
   },
 ];
 
@@ -430,10 +456,18 @@ function sectionIconButton(kind, label, route) {
 
 function doneTick() {
   return `
-    <span class="status-tick" aria-label="done">
+    <span class="status-tick universal-tick" aria-label="done">
       <svg viewBox="0 0 32 24" aria-hidden="true">
         <path d="M4.5 13.3c3.5 2.1 6.2 4.2 8.6 6.3 4.1-6.2 8.7-11.2 14.4-15.2" />
       </svg>
+    </span>
+  `;
+}
+
+function optionTick(selected, label = "selected") {
+  return `
+    <span class="option-mark${selected ? " is-selected" : ""}" aria-label="${selected ? label : "not selected"}">
+      <svg viewBox="0 0 32 24" aria-hidden="true"><path d="M4.5 13.3c3.5 2.1 6.2 4.2 8.6 6.3 4.1-6.2 8.7-11.2 14.4-15.2" /></svg>
     </span>
   `;
 }
@@ -581,7 +615,7 @@ function renderHome() {
         <div class="section-head">
           <div class="section-title-wrap">
             <span class="section-illustration-wrap is-daily">
-              <img class="section-illustration" src="./assets/illustrations/john-praying-at-bed.png" alt="" />
+              <img class="section-illustration" src="./assets/illustrations/v2/john-morning-prayer.png" alt="" />
               <svg class="rising-sun-mark" viewBox="0 0 42 32" aria-hidden="true">
                 <path class="sun-fill" d="M7 25.4c3-9.1 8.1-13.7 15.5-13.4 7.5.3 11.4 5.1 13.1 13.6-8.7.8-18 .7-28.6-.2Z" />
                 <path class="sun-line" d="M8.2 25.1c4.4-.6 9.2-.7 14.3-.6 4.3.1 8.4.4 12.7.9" />
@@ -749,11 +783,13 @@ function renderQuestionSlide(q, slide, index) {
       </section>
     `;
   }
+  if (slide.id === "quiz") return renderQuizQuestion(slide);
+  if (slide.id === "complete") return renderQuestionComplete(slide, index);
   return `
     <section class="question-slide-panel is-reflection">
       <p class="question-number">+${slide.xp}xp</p>
       <h1 class="story-title">${slide.title}</h1>
-      <div class="reflection-prompt">
+      <label class="reflection-prompt">
         <svg class="fountain-pen-icon" viewBox="0 0 48 48" aria-hidden="true">
           <path d="M31.4 5.7c4.5 2.7 7.9 5.7 10.5 9.5-8.7 9-17.8 17.5-27.3 25.4-3-2.4-5.5-4.9-7.6-7.8C14.8 23.7 22.8 14.7 31.4 5.7Z"/>
           <path d="M27.7 9.8c3.6 2.5 6.8 5.4 9.7 8.7"/>
@@ -762,7 +798,47 @@ function renderQuestionSlide(q, slide, index) {
           <path d="M11.5 37.6c.5-.5 1.1-.8 1.8-.8"/>
         </svg>
         <p>Describe in your own words and share with the community your thoughts about this question.</p>
-      </div>
+        <textarea data-action="reflection-input" maxlength="600" placeholder="Write your reflection…">${state.reflectionDraft}</textarea>
+        <span class="reflection-count">${state.reflectionDraft.length}/600</span>
+      </label>
+    </section>
+  `;
+}
+
+function renderQuizQuestion(slide) {
+  const answers = [
+    ["feeling", "A strong religious feeling"],
+    ["person", "The third Person of the Holy Trinity"],
+    ["symbol", "Only a symbol for God's power"],
+  ];
+  const answerRows = answers.map(([value, label]) => `
+    <button class="selection-row${state.quizAnswer === value ? " is-selected" : ""}" type="button" data-action="answer-quiz" data-answer="${value}">
+      <span>${label}</span>${optionTick(state.quizAnswer === value)}
+    </button>
+  `).join("");
+  const feedback = state.quizAnswer
+    ? `<p class="quiz-feedback ${state.quizAnswer === "person" ? "is-correct" : "is-wrong"}">${state.quizAnswer === "person" ? "Exactly. The Holy Spirit is God, with the Father and the Son." : "Look again at YOUCAT 113: the Spirit is not merely a feeling or symbol."}</p>`
+    : "";
+  return `
+    <section class="question-slide-panel is-quiz">
+      <p class="question-number">+${slide.xp}xp</p>
+      <h1 class="story-title">${slide.title}</h1>
+      <p class="quiz-question">Who is the Holy Spirit?</p>
+      <div class="quiz-options">${answerRows}</div>
+      ${feedback}
+    </section>
+  `;
+}
+
+function renderQuestionComplete(slide, index) {
+  return `
+    <section class="question-slide-panel is-complete">
+      <img class="question-complete-illustration" src="./assets/illustrations/v2/john-question-complete.png" alt="" />
+      <p class="question-number">YOUCAT 113</p>
+      <h1 class="story-title">${slide.title}</h1>
+      <p class="completion-copy">You read, played, answered, and reflected. The next question is now unlocked.</p>
+      <div class="completion-xp"><strong>+${questionSlideEarnedXp(index)} XP</strong><span>added to Explore</span></div>
+      <button class="drawn-button" type="button" data-action="go" data-route="explore">Continue learning</button>
     </section>
   `;
 }
@@ -874,7 +950,8 @@ function renderReflections() {
 function renderRead() {
   return `
     <div class="page">
-      <div class="page-head">
+      <div class="page-head library-head">
+        <img class="route-illustration" src="./assets/illustrations/v2/john-reading.png" alt="" />
         <h1 class="route-title">Library</h1>
       </div>
       <section class="section">
@@ -931,7 +1008,7 @@ function renderGroups() {
   return `
     <div class="page">
       <div class="group-hero">
-        <img class="hero-illustration" src="./assets/illustrations/isabelle-checkered-flag.png" alt="" />
+        <img class="hero-illustration" src="./assets/illustrations/v2/isabelle-study-circle.png" alt="" />
         <div class="page-head">
           <p class="eyebrow">Groups</p>
           <h1 class="route-title">Together</h1>
@@ -939,8 +1016,8 @@ function renderGroups() {
         </div>
       </div>
       <div class="button-row">
-        <button class="drawn-button" type="button" data-action="open-group" data-group="alpha-youth">Join code</button>
-        <button class="ghost-button" type="button" data-action="open-group" data-group="st-mary">Create</button>
+        <button class="drawn-button" type="button" data-action="go" data-route="groupJoin">Join code</button>
+        <button class="ghost-button" type="button" data-action="go" data-route="groupCreate">Create</button>
       </div>
       <section class="section">
         <div class="section-head">
@@ -998,7 +1075,7 @@ function renderPray() {
   return `
     <div class="page">
       <div class="prayer-hero">
-        <img class="hero-illustration" src="./assets/illustrations/john-praying-at-bed.png" alt="" />
+        <img class="hero-illustration" src="./assets/illustrations/v2/john-prayer-kneeling.png" alt="" />
         <div class="page-head">
           <h1 class="route-title">Pray</h1>
         </div>
@@ -1235,6 +1312,140 @@ function renderPrayer() {
   `;
 }
 
+function renderOnboarding() {
+  const steps = [
+    {
+      title: "Start your journey",
+      support: "Learn the Catholic faith step by step, at your own pace.",
+      image: "./assets/illustrations/v2/isabelle-welcome.png",
+      content: `
+        <button class="drawn-button onboarding-wide" type="button" data-action="onboarding-next">Create free account</button>
+        <button class="ghost-button onboarding-wide" type="button" data-action="onboarding-next">Continue as guest</button>
+        <button class="text-link" type="button" data-action="onboarding-next">I already have an account</button>
+      `,
+    },
+    {
+      title: "What is your name?",
+      support: "Other users will only see your first name.",
+      image: "./assets/illustrations/v2/john-reflection-writing.png",
+      content: `
+        <label class="onboarding-field is-active"><input data-action="onboarding-name" value="${escapeAttribute(state.onboardingName)}" placeholder="First name" /></label>
+        <label class="onboarding-field"><input placeholder="Last name" /></label>
+        <label class="onboarding-field"><input type="email" placeholder="Email address" /></label>
+      `,
+    },
+    {
+      title: "How old are you?",
+      support: "We'll match you with people in your age group.",
+      image: "./assets/illustrations/v2/john-learning-path.png",
+      content: `
+        <div class="age-value"><strong>${state.onboardingAge}</strong><span>years old</span></div>
+        <div class="age-slider-wrap">
+          <svg class="age-slider-line" viewBox="0 0 300 18" preserveAspectRatio="none" aria-hidden="true">
+            <path class="age-track" pathLength="100" d="M2 9.5C25 7.6 45 10.8 69 9.1S111 7.8 137 9.6s47-1.5 72-.2 52-1.2 89-.1" />
+            <path class="age-fill" pathLength="100" stroke-dasharray="${(((state.onboardingAge - 12) / 68) * 100).toFixed(2)} 100" d="M2 9.5C25 7.6 45 10.8 69 9.1S111 7.8 137 9.6s47-1.5 72-.2 52-1.2 89-.1" />
+          </svg>
+          <input class="age-slider" type="range" min="12" max="80" value="${state.onboardingAge}" data-action="onboarding-age" aria-label="Age" />
+        </div>
+        <div class="slider-labels"><span>12</span><span>80</span></div>
+      `,
+    },
+    {
+      title: "Choose your language",
+      support: "You can change this later in Settings.",
+      image: "./assets/illustrations/v2/john-reading.png",
+      content: `
+        <div class="selection-list">
+          ${["English", "Deutsch", "Español", "Français", "Italiano", "Português"].map((language) => `
+            <button class="selection-row${state.onboardingLanguage === language ? " is-selected" : ""}" type="button" data-action="select-language" data-language="${language}">
+              <span>${language}</span>${optionTick(state.onboardingLanguage === language)}
+            </button>
+          `).join("")}
+        </div>
+      `,
+    },
+    {
+      title: "Set a gentle rhythm",
+      support: "Start small. You can adjust this any time.",
+      image: "./assets/illustrations/v2/john-morning-prayer.png",
+      content: `
+        <p class="control-label">Questions each day</p>
+        <div class="segmented-control">
+          ${[1, 3, 5].map((count) => `<button class="${state.routineQuestions === count ? "is-selected" : ""}" type="button" data-action="select-routine" data-count="${count}"><span>${count}</span>${optionTick(state.routineQuestions === count)}</button>`).join("")}
+        </div>
+        <button class="toggle-row${state.routinePrayer ? " is-selected" : ""}" type="button" data-action="toggle-routine-option" data-option="prayer"><span>Evening prayer</span>${optionTick(state.routinePrayer)}</button>
+        <button class="toggle-row${state.routineReminder ? " is-selected" : ""}" type="button" data-action="toggle-routine-option" data-option="reminder"><span>Quiet reminder at 20:00</span>${optionTick(state.routineReminder)}</button>
+      `,
+    },
+    {
+      title: "You're ready",
+      support: "Your first question is waiting: YOUCAT 113.",
+      image: "./assets/illustrations/v2/isabelle-welcome.png",
+      content: `<button class="drawn-button onboarding-wide" type="button" data-action="finish-onboarding">Enter Home</button>`,
+    },
+  ];
+  const step = steps[state.onboardingStep] || steps[0];
+  return `
+    <div class="page onboarding-page">
+      <div class="onboarding-copy"><h1 class="route-title">${step.title}</h1><p class="support">${step.support}</p></div>
+      <img class="onboarding-illustration" src="${step.image}" alt="" />
+      <div class="onboarding-controls${state.onboardingStep === 2 ? " is-age" : ""}">${step.content}</div>
+      <div class="onboarding-navigation">
+        ${prayerArrow("prev", state.onboardingStep === 0, "onboarding")}
+        ${renderPrayerDots(state.onboardingStep, steps.length)}
+        ${prayerArrow("next", state.onboardingStep === steps.length - 1, "onboarding")}
+      </div>
+    </div>
+  `;
+}
+
+function renderGroupJoin() {
+  return `
+    <div class="page">
+      ${backButton("groups")}
+      <img class="route-illustration is-group" src="./assets/illustrations/v2/isabelle-study-circle.png" alt="" />
+      <div class="page-head"><h1 class="route-title">Join a group</h1><p class="support">Enter the four-letter code from your group leader.</p></div>
+      <label class="group-code-input"><input maxlength="4" value="${state.groupJoinCode}" data-action="group-code-input" placeholder="ETLS" /></label>
+      <button class="drawn-button onboarding-wide" type="button" data-action="join-group">Join group</button>
+    </div>
+  `;
+}
+
+function renderGroupCreate() {
+  return `
+    <div class="page">
+      ${backButton("groups")}
+      <div class="page-head"><h1 class="route-title">Create study room</h1><p class="support">Choose up to three questions. The room stays open for 24 hours.</p></div>
+      <div class="question-picker">
+        <button class="selection-row is-selected" type="button"><span>YOUCAT 113 · Holy Spirit</span>${optionTick(true)}</button>
+        <button class="selection-row is-selected" type="button"><span>YOUCAT 469 · Prayer</span>${optionTick(true)}</button>
+        <button class="selection-row" type="button"><span>DOCAT 139 · Work and dignity</span>${optionTick(false)}</button>
+      </div>
+      <div class="group-summary"><span>2 questions</span><strong>Code appears after creation</strong></div>
+      <button class="drawn-button onboarding-wide" type="button" data-action="create-group">Create room</button>
+    </div>
+  `;
+}
+
+function renderSystemState() {
+  const type = state.params.type || "offline";
+  const states = {
+    offline: { title: "You're offline", body: "Downloaded prayers and books still work. Learning games will continue when you reconnect.", image: "john-offline.png", action: "Try again" },
+    locked: { title: "Keep learning", body: "Earn 15 more XP in this pack to unlock the next question.", image: "john-unlocks-gate.png", action: "Back to question" },
+    empty: { title: "Nothing saved yet", body: "Bookmark a question, prayer, or Bible passage and it will appear here.", image: "john-empty-bookmarks.png", action: "Browse Library" },
+  };
+  const item = states[type] || states.offline;
+  return `
+    <div class="page system-state-page">
+      ${backButton("settings")}
+      <img class="system-state-illustration" src="./assets/illustrations/v2/${item.image}" alt="" />
+      <h1 class="route-title">${item.title}</h1>
+      <p class="support">${item.body}</p>
+      <button class="drawn-button onboarding-wide" type="button" data-action="back">${item.action}</button>
+    </div>
+  `;
+}
+
 function renderSettings() {
   return `
     <div class="page settings-panel">
@@ -1248,6 +1459,10 @@ function renderSettings() {
         <div class="settings-row"><span class="item-title">Language</span><span class="settings-value">English</span></div>
         <div class="settings-row"><span class="item-title">Subscription</span><span class="settings-value">Family</span></div>
         <div class="settings-row"><span class="item-title">Notifications</span><span class="settings-value">quiet</span></div>
+        <button class="settings-row" type="button" data-action="go" data-route="onboarding"><span class="item-title">Replay onboarding</span><span class="settings-value">›</span></button>
+        <button class="settings-row" type="button" data-action="open-system-state" data-state="offline"><span class="item-title">Offline preview</span><span class="settings-value">›</span></button>
+        <button class="settings-row" type="button" data-action="open-system-state" data-state="locked"><span class="item-title">Locked preview</span><span class="settings-value">›</span></button>
+        <button class="settings-row" type="button" data-action="open-system-state" data-state="empty"><span class="item-title">Empty preview</span><span class="settings-value">›</span></button>
         <div class="settings-row"><span class="item-title">Sign out</span><span class="settings-value"></span></div>
         <div class="settings-row"><span class="item-title">Delete account</span><span class="settings-value"></span></div>
       </div>
@@ -1292,13 +1507,18 @@ function render() {
     reader: renderReader,
     groups: renderGroups,
     group: renderGroup,
+    groupCreate: renderGroupCreate,
+    groupJoin: renderGroupJoin,
     pray: renderPray,
     prayer: renderPrayer,
     settings: renderSettings,
     notifications: renderNotifications,
+    onboarding: renderOnboarding,
+    systemState: renderSystemState,
   }[state.route] || renderHome;
 
   screenEl.innerHTML = renderer();
+  document.querySelector(".phone-frame").classList.toggle("is-onboarding", state.route === "onboarding");
   const active = routesWithNav[state.route] || "home";
   navItems.forEach((item) => item.classList.toggle("is-active", item.dataset.route === active));
   requestAnimationFrame(() => {
@@ -1344,6 +1564,33 @@ function stopDeepDiveTimer() {
   deepDiveTimerId = null;
 }
 
+function updateCountdownDisplay(kind) {
+  const isSource = kind === "source";
+  const timer = isSource
+    ? screenEl.querySelector(".source-timer")
+    : screenEl.querySelector(".question-slide-panel.is-deep-dive > .deep-dive-timer");
+  if (!timer) return;
+
+  const seconds = isSource ? state.sourceSeconds : state.deepDiveSeconds;
+  const earned = isSource ? state.sourceXpEarned : state.deepDiveXpEarned;
+  const xp = isSource ? 5 : 15;
+  const count = timer.querySelector(".timer-count");
+  const copy = timer.querySelector(".timer-copy");
+
+  timer.classList.toggle("is-earned", earned);
+  timer.setAttribute("aria-label", earned ? `${xp} XP earned` : `${seconds} seconds remaining`);
+
+  if (earned) {
+    if (count) count.innerHTML = doneTick();
+    if (copy) copy.textContent = `+${xp}xp earned`;
+  } else if (count) {
+    count.textContent = String(seconds);
+  }
+
+  const xpRail = screenEl.querySelector(".question-xp-rail");
+  if (xpRail) xpRail.outerHTML = renderQuestionXpRail(state.questionSlide);
+}
+
 function syncSourceTimer() {
   if (!isSourceSlideActive() || state.sourceSeconds <= 0) {
     stopSourceTimer();
@@ -1360,7 +1607,7 @@ function syncSourceTimer() {
       state.sourceXpEarned = true;
       stopSourceTimer();
     }
-    render();
+    updateCountdownDisplay("source");
   }, 1000);
 }
 
@@ -1380,7 +1627,7 @@ function syncDeepDiveTimer() {
       state.deepDiveXpEarned = true;
       stopDeepDiveTimer();
     }
-    render();
+    updateCountdownDisplay("deep-dive");
   }, 1000);
 }
 
@@ -1435,6 +1682,7 @@ document.addEventListener("click", (event) => {
 
   const action = target.dataset.action;
   if (action === "go") {
+    if (target.dataset.route === "onboarding") state.onboardingStep = 0;
     if (target.dataset.route === "explore") {
       state.questionSlide = 0;
       state.deepDiveOpen = false;
@@ -1487,6 +1735,10 @@ document.addEventListener("click", (event) => {
     state.sourceAudioPlaying = false;
     state.deepDiveAudioActive = false;
     state.deepDiveAudioPlaying = false;
+    render();
+  }
+  if (action === "answer-quiz") {
+    state.quizAnswer = target.dataset.answer || "";
     render();
   }
   if (action === "open-deep-dive") {
@@ -1599,6 +1851,40 @@ document.addEventListener("click", (event) => {
   if (action === "open-group") {
     go("group", { group: target.dataset.group || "st-mary" });
   }
+  if (action === "join-group") {
+    go("group", { group: "alpha-youth" });
+  }
+  if (action === "create-group") {
+    go("group", { group: "alpha-youth" });
+  }
+  if (action === "onboarding-prev") {
+    state.onboardingStep = Math.max(0, state.onboardingStep - 1);
+    render();
+  }
+  if (action === "onboarding-next") {
+    state.onboardingStep = Math.min(5, state.onboardingStep + 1);
+    render();
+  }
+  if (action === "finish-onboarding") {
+    state.onboardingStep = 0;
+    go("home");
+  }
+  if (action === "select-language") {
+    state.onboardingLanguage = target.dataset.language || "English";
+    render();
+  }
+  if (action === "select-routine") {
+    state.routineQuestions = Number(target.dataset.count || 3);
+    render();
+  }
+  if (action === "toggle-routine-option") {
+    if (target.dataset.option === "prayer") state.routinePrayer = !state.routinePrayer;
+    if (target.dataset.option === "reminder") state.routineReminder = !state.routineReminder;
+    render();
+  }
+  if (action === "open-system-state") {
+    go("systemState", { type: target.dataset.state || "offline" });
+  }
   if (action === "heart") {
     const person = target.dataset.person;
     state.heartsGiven[person] = (state.heartsGiven[person] || 0) + 1;
@@ -1620,6 +1906,26 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("input", (event) => {
+  const actionTarget = event.target.closest("[data-action]");
+  if (actionTarget?.dataset.action === "onboarding-name") {
+    state.onboardingName = actionTarget.value;
+    return;
+  }
+  if (actionTarget?.dataset.action === "onboarding-age") {
+    state.onboardingAge = Number(actionTarget.value);
+    render();
+    return;
+  }
+  if (actionTarget?.dataset.action === "reflection-input") {
+    state.reflectionDraft = actionTarget.value;
+    const count = screenEl.querySelector(".reflection-count");
+    if (count) count.textContent = `${state.reflectionDraft.length}/600`;
+    return;
+  }
+  if (actionTarget?.dataset.action === "group-code-input") {
+    state.groupJoinCode = actionTarget.value.toUpperCase();
+    return;
+  }
   const target = event.target.closest("[data-action='bookmark-search']");
   if (!target) return;
 
